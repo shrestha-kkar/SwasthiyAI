@@ -1,0 +1,292 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// ENUMS
+// ========================================
+
+enum UserRole {
+  ADMIN
+  DOCTOR
+  PATIENT
+  STAFF
+}
+
+enum VisitStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum VisitType {
+  CONSULTATION
+  FOLLOW_UP
+  EMERGENCY
+  PROCEDURE
+}
+
+// ========================================
+// USERS & AUTHENTICATION
+// ========================================
+
+/// Represents a user in the system with authentication and role-based access
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  role          UserRole  @default(PATIENT)
+  hospitalId    String
+  hospital      Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  doctorProfile   DoctorProfile?
+  patientProfile  PatientProfile?
+  
+  // Audit fields
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLogin     DateTime?
+
+  @@index([hospitalId])
+  @@index([email])
+  @@map("users")
+}
+
+// ========================================
+// HOSPITALS
+// ========================================
+
+/// Represents a hospital or healthcare facility
+model Hospital {
+  id              String    @id @default(cuid())
+  name            String    @unique
+  address         String
+  city            String
+  state           String
+  zipCode         String
+  phone           String
+  email           String
+  
+  // Relations
+  users           User[]
+  patients        PatientProfile[]
+  doctors         DoctorProfile[]
+  visits          Visit[]
+  intakeForms     PatientIntake[]
+  
+  // Audit fields
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([name])
+  @@map("hospitals")
+}
+
+// ========================================
+// DOCTOR PROFILE
+// ========================================
+
+/// Extended profile information for doctors
+model DoctorProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  hospitalId      String
+  hospital        Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  
+  // Professional information
+  licenseNumber   String    @unique
+  specialization String    // e.g., "Cardiology", "Pediatrics"
+  yearsOfExperience Int
+  qualifications  String    // e.g., "MBBS, MD Cardiology"
+  
+  // Relations
+  visits          Visit[]   @relation("DoctorVisits")
+  doctorNotes     DoctorNote[]
+  
+  // Availability
+  isAvailable     Boolean   @default(true)
+  bio             String?
+  
+  // Audit fields
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([hospitalId])
+  @@index([licenseNumber])
+  @@map("doctor_profiles")
+}
+
+// ========================================
+// PATIENT PROFILE
+// ========================================
+
+/// Extended profile information for patients
+model PatientProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  hospitalId      String
+  hospital        Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  
+  // Personal medical information
+  dateOfBirth     DateTime
+  gender          String    // "M", "F", "Other"
+  bloodGroup      String?   // "A+", "B-", etc.
+  
+  // Contact information
+  phoneNumber     String?
+  emergencyContact String?
+  emergencyPhone  String?
+  
+  // Medical history
+  allergies       String?   // Comma-separated or JSON
+  chronicalConditions String?
+  surgicalHistory String?
+  
+  // Relations
+  visits          Visit[]
+  intakeForms     PatientIntake[]
+  
+  // Audit fields
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([hospitalId])
+  @@index([userId])
+  @@map("patient_profiles")
+}
+
+// ========================================
+// VISITS
+// ========================================
+
+/// Represents a visit/appointment between a patient and doctor
+model Visit {
+  id              String    @id @default(cuid())
+  
+  // Patient information
+  patientId       String
+  patient         PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  // Doctor information
+  doctorId        String
+  doctor          DoctorProfile  @relation("DoctorVisits", fields: [doctorId], references: [id], onDelete: Restrict)
+  
+  // Hospital information
+  hospitalId      String
+  hospital        Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  
+  // Visit details
+  status          VisitStatus @default(SCHEDULED)
+  type            VisitType   @default(CONSULTATION)
+  
+  // Timing
+  scheduledDate   DateTime
+  scheduledTime   DateTime
+  completedAt     DateTime?
+  duration        Int?      // Duration in minutes
+  
+  // Visit information
+  reason          String    // Chief complaint or reason for visit
+  notes           String?   // General visit notes
+  
+  // Relations
+  doctorNotes     DoctorNote[]
+  
+  // Audit fields
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([hospitalId])
+  @@index([scheduledDate])
+  @@index([status])
+  @@map("visits")
+}
+
+// ========================================
+// DOCTOR NOTES
+// ========================================
+
+/// Doctor's notes and observations for a specific visit
+model DoctorNote {
+  id              String    @id @default(cuid())
+  
+  // Visit and doctor information
+  visitId         String
+  visit           Visit     @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  
+  doctorId        String
+  doctor          DoctorProfile @relation(fields: [doctorId], references: [id], onDelete: Restrict)
+  
+  // Clinical notes
+  symptoms        String    // Patient symptoms
+  diagnosis       String?   // Doctor's diagnosis
+  prescription    String?   // Prescribed medications (JSON or text)
+  observations    String    // Doctor's observations
+  recommendations String?   // Follow-up recommendations
+  
+  // Additional clinical data
+  vitals          String?   // JSON: { bloodPressure, temperature, pulse, respiration }
+  labResults      String?   // References to lab tests
+  
+  // Audit fields
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([visitId])
+  @@index([doctorId])
+  @@map("doctor_notes")
+}
+
+// ========================================
+// PATIENT INTAKE
+// ========================================
+
+/// Patient AI-assisted intake form responses
+model PatientIntake {
+  id              String    @id @default(cuid())
+  
+  // Patient information
+  patientId       String
+  patient         PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  hospitalId      String
+  hospital        Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  
+  // Intake content
+  chatHistory     String    // JSON array of { role, content } messages
+  
+  // Structured extraction
+  structuredData  String?   // JSON: { currentSymptoms, duration, severity, triggers, medicalHistory, medications, etc. }
+  
+  // Status
+  isComplete      Boolean   @default(false)
+  isReviewedByDoc Boolean   @default(false)
+  reviewedBy      String?   // Doctor user ID
+  
+  // Audit fields
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([patientId])
+  @@index([hospitalId])
+  @@index([isComplete])
+  @@map("patient_intakes")
+}
