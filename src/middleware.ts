@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Define protected routes by role
 const PROTECTED_ROUTES: Record<string, string[]> = {
-  "/doctor": ["doctor"],
-  "/patient": ["patient"],
-  "/admin": ["admin"],
+  "/dashboard/doctor": ["doctor"],
+  "/dashboard/patient": ["patient"],
+  "/dashboard/admin": ["admin"],
   "/dashboard": ["doctor", "patient", "admin"],
 };
 
