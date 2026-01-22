@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { StatsCard } from '@/components/StatsCard';
 
 const MedicalIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,107 +45,102 @@ export default function PatientPage() {
   const { user } = useAuth();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in-up">
       {/* Hero Header */}
-      <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg flex items-center justify-center text-blue-600">
-            <MedicalIcon />
-          </div>
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900">Patient Dashboard</h1>
-            <p className="text-gray-600 mt-2">Manage your healthcare and medical records</p>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold font-heading text-slate-900">Patient Dashboard</h2>
+          <p className="text-slate-500 mt-1">Manage your healthcare and medical records</p>
         </div>
       </div>
 
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Appointments Card */}
-        <div className="bg-white rounded-xl border border-gray-200 p-7 shadow-sm hover:shadow-md transition">
-          <div className="flex items-start justify-between mb-5">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-              <CalendarIcon />
-            </div>
-            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Active</span>
-          </div>
-          <p className="text-sm font-medium text-gray-600 mb-2">Upcoming Appointments</p>
-          <p className="text-3xl font-bold text-gray-900 mb-4">2</p>
-          <Link href="/dashboard/patient/appointments" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition">
-            View Appointments
+        <div className="relative group">
+          <StatsCard
+            title="Upcoming"
+            value="2"
+            variant="default"
+            icon={<CalendarIcon />}
+            description="Scheduled appointments"
+          />
+          <Link
+            href="/dashboard/patient/appointments"
+            className="absolute bottom-4 right-6 text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            View
             <ArrowRightIcon />
           </Link>
         </div>
 
         {/* Health Status Card */}
-        <div className="bg-white rounded-xl border border-gray-200 p-7 shadow-sm hover:shadow-md transition">
-          <div className="flex items-start justify-between mb-5">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
-              <HealthIcon />
-            </div>
-            <span className="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">Good</span>
-          </div>
-          <p className="text-sm font-medium text-gray-600 mb-2">Health Status</p>
-          <p className="text-3xl font-bold text-gray-900 mb-4">Excellent</p>
-          <p className="text-xs text-gray-500">Last checkup: 2 days ago</p>
-        </div>
+        <StatsCard
+          title="Health Status"
+          value="Good"
+          variant="success"
+          icon={<HealthIcon />}
+          description="Last checkup: 2 days ago"
+        />
 
         {/* Medical Records Card */}
-        <div className="bg-white rounded-xl border border-gray-200 p-7 shadow-sm hover:shadow-md transition">
-          <div className="flex items-start justify-between mb-5">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">
-              <DocumentIcon />
-            </div>
-            <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">Documents</span>
-          </div>
-          <p className="text-sm font-medium text-gray-600 mb-2">Medical Records</p>
-          <p className="text-3xl font-bold text-gray-900 mb-4">5</p>
-          <Link href="/dashboard/patient/records" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition">
-            View Records
+        <div className="relative group">
+          <StatsCard
+            title="Records"
+            value="5"
+            variant="info"
+            icon={<DocumentIcon />}
+            description="Medical documents"
+          />
+          <Link
+            href="/dashboard/patient/records"
+            className="absolute bottom-4 right-6 text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            Access
             <ArrowRightIcon />
           </Link>
         </div>
       </div>
 
       {/* Quick Actions Section */}
-      <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
-        <h2 className="text-xl font-bold text-gray-900 mb-8">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <Link href="/dashboard/patient/intake" className="p-6 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition group">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4 group-hover:bg-blue-200 transition">
+      <div>
+        <h2 className="text-xl font-bold font-heading text-slate-900 mb-6 px-1">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Link href="/dashboard/patient/intake" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-premium hover:-translate-y-1 transition-all duration-300 group">
+            <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 mb-4 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
               <MedicalIcon />
             </div>
-            <p className="font-semibold text-gray-900 group-hover:text-blue-600 transition mb-2">Medical Intake</p>
-            <p className="text-sm text-gray-600">Complete health form</p>
+            <h3 className="font-bold text-slate-900 text-lg mb-2 group-hover:text-primary-700 transition-colors">Medical Intake</h3>
+            <p className="text-slate-500 text-sm">Complete health forms before your visit</p>
           </Link>
 
-          <Link href="/dashboard/patient/appointments" className="p-6 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-200 transition group">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mb-4 group-hover:bg-green-200 transition">
+          <Link href="/dashboard/patient/appointments" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-premium hover:-translate-y-1 transition-all duration-300 group">
+            <div className="w-12 h-12 bg-secondary-50 rounded-xl flex items-center justify-center text-secondary-600 mb-4 group-hover:bg-secondary-600 group-hover:text-white transition-colors duration-300">
               <CalendarIcon />
             </div>
-            <p className="font-semibold text-gray-900 group-hover:text-green-600 transition mb-2">My Appointments</p>
-            <p className="text-sm text-gray-600">Schedule and manage visits</p>
+            <h3 className="font-bold text-slate-900 text-lg mb-2 group-hover:text-secondary-700 transition-colors">My Appointments</h3>
+            <p className="text-slate-500 text-sm">Schedule and manage your doctor visits</p>
           </Link>
 
-          <Link href="/dashboard/patient/records" className="p-6 border border-gray-200 rounded-lg hover:bg-purple-50 hover:border-purple-200 transition group">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 mb-4 group-hover:bg-purple-200 transition">
+          <Link href="/dashboard/patient/records" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-premium hover:-translate-y-1 transition-all duration-300 group">
+            <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center text-violet-600 mb-4 group-hover:bg-violet-600 group-hover:text-white transition-colors duration-300">
               <DocumentIcon />
             </div>
-            <p className="font-semibold text-gray-900 group-hover:text-purple-600 transition mb-2">Medical Records</p>
-            <p className="text-sm text-gray-600">Access your medical history</p>
+            <h3 className="font-bold text-slate-900 text-lg mb-2 group-hover:text-violet-700 transition-colors">Medical Records</h3>
+            <p className="text-slate-500 text-sm">Access your complete medical history</p>
           </Link>
         </div>
       </div>
 
       {/* Information Card */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-8">
-        <div className="flex gap-4">
-          <div className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8">
+        <div className="flex gap-4 items-start">
+          <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm shrink-0">
             <InfoIcon />
           </div>
           <div>
-            <h3 className="font-semibold text-blue-900 mb-3">About Your Health Dashboard</h3>
-            <p className="text-sm text-blue-800 leading-relaxed">
+            <h3 className="font-bold text-blue-900 mb-2">About Your Health Dashboard</h3>
+            <p className="text-sm text-blue-800/80 leading-relaxed max-w-3xl">
               Your dashboard provides a comprehensive view of your health information. You can complete medical intake forms, schedule appointments with our doctors, and access your medical records all in one place. All your information is securely stored and kept confidential.
             </p>
           </div>

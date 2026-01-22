@@ -17,33 +17,33 @@ export function StatsCard({
   icon,
   variant = "default",
 }: StatsCardProps) {
-  const variantClasses = {
-    default: "bg-white border-l-4 border-blue-500",
-    success: "bg-white border-l-4 border-green-500",
-    warning: "bg-white border-l-4 border-yellow-500",
-    info: "bg-white border-l-4 border-purple-500",
+  const variantStyles = {
+    default: { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-100" },
+    success: { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-100" },
+    warning: { bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-100" },
+    info: { bg: "bg-violet-50", text: "text-violet-600", border: "border-violet-100" },
   };
 
-  const valueClasses = {
-    default: "text-blue-600",
-    success: "text-green-600",
-    warning: "text-yellow-600",
-    info: "text-purple-600",
-  };
+  const style = variantStyles[variant];
 
   return (
-    <div className={`${variantClasses[variant]} rounded-lg p-6 shadow-md`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className={`text-3xl font-bold ${valueClasses[variant]} mt-2`}>
+    <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-slate-100 hover:shadow-premium hover:-translate-y-0.5 transition-all duration-300">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-slate-500 tracking-wide uppercase">{title}</p>
+          <p className="text-3xl font-bold text-slate-900 tracking-tight">
             {value}
           </p>
           {description && (
-            <p className="text-xs text-gray-500 mt-2">{description}</p>
+            <p className="text-xs font-medium text-slate-400">{description}</p>
           )}
         </div>
-        {icon && <div className="text-3xl opacity-20">{icon}</div>}
+        {icon && (
+          <div className={`p-3 rounded-xl ${style.bg} ${style.text} flex items-center justify-center`}>
+            {/* Render icon directly, assuming it has appropriate size or inherits */}
+            {icon}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types/index";
 
@@ -42,18 +42,21 @@ const LogoutIcon = () => (
 export default function DashboardContent({ children }: DashboardContentProps) {
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     logout();
     router.push("/");
   };
 
+  const isActive = (path: string) => pathname === path;
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="flex items-center justify-center h-screen bg-slate-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-700 font-medium">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading...</p>
         </div>
       </div>
     );
@@ -68,158 +71,131 @@ export default function DashboardContent({ children }: DashboardContentProps) {
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
+  const NavItem = ({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) => (
+    <Link
+      href={href}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive(href)
+        ? "bg-primary-50 text-primary-700 font-semibold shadow-sm"
+        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium"
+        }`}
+    >
+      <div className={`${isActive(href) ? "text-primary-600" : "text-slate-400 group-hover:text-slate-600"}`}>
+        {icon}
+      </div>
+      <span>{label}</span>
+    </Link>
+  );
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-slate-50 font-sans">
       {/* Sidebar */}
-      <aside className="w-72 bg-white shadow-sm border-r border-gray-200 flex flex-col">
+      <aside className="w-72 bg-white border-r border-slate-200 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
         {/* Logo & Branding */}
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">
-            SwasthyaSetu
-          </h1>
-          <p className="text-sm text-gray-500 mt-1 font-medium">{getRoleLabel(user.role)} Dashboard</p>
+        <div className="p-6">
+          <div className="flex items-center gap-2 px-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center text-white">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a9 9 0 110 18m0-18a9 9 0 100 18m0-18V4m0 2a9 9 0 110 18m0-18a9 9 0 100 18" /></svg>
+            </div>
+            <h1 className="text-xl font-bold font-heading text-slate-900 tracking-tight">
+              Swasthya<span className="text-primary-600">Setu</span>
+            </h1>
+          </div>
         </div>
 
         {/* User Info Card */}
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-br from-blue-50 to-indigo-50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-600 truncate">{user.email}</p>
+        <div className="px-6 mb-6">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary-700 font-bold shadow-sm">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900 truncate">{user.name}</p>
+                <p className="text-xs text-slate-500 truncate">{getRoleLabel(user.role)}</p>
+              </div>
             </div>
           </div>
-          <span className="inline-block mt-3 px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
-            {getRoleLabel(user.role)}
-          </span>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-6 space-y-1 overflow-y-auto">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition group"
-          >
-            <DashboardIcon />
-            <span className="font-medium text-sm">Dashboard</span>
-          </Link>
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+          <NavItem href="/dashboard" icon={<DashboardIcon />} label="Dashboard" />
 
           {user.role === UserRole.DOCTOR && (
             <>
-              <div className="pt-4">
-                <p className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Patient Management</p>
+              <div className="mt-6 mb-2 px-4">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Patient Management</p>
               </div>
-              <Link
-                href="/dashboard/doctor/appointments"
-                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-              >
-                <CalendarIcon />
-                <span className="font-medium text-sm">My Appointments</span>
-              </Link>
-              <Link
-                href="/dashboard/doctor/patients"
-                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-              >
-                <UsersIcon />
-                <span className="font-medium text-sm">My Patients</span>
-              </Link>
+              <NavItem href="/dashboard/doctor/appointments" icon={<CalendarIcon />} label="My Appointments" />
+              <NavItem href="/dashboard/doctor/patients" icon={<UsersIcon />} label="My Patients" />
             </>
           )}
 
           {user.role === UserRole.PATIENT && (
             <>
-              <div className="pt-4">
-                <p className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Health Management</p>
+              <div className="mt-6 mb-2 px-4">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Health Management</p>
               </div>
-              <Link
-                href="/dashboard/patient/intake"
-                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-              >
-                <DocumentIcon />
-                <span className="font-medium text-sm">Medical Intake</span>
-              </Link>
-              <Link
-                href="/dashboard/patient/appointments"
-                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-              >
-                <CalendarIcon />
-                <span className="font-medium text-sm">My Appointments</span>
-              </Link>
-              <Link
-                href="/dashboard/patient/records"
-                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-              >
-                <DocumentIcon />
-                <span className="font-medium text-sm">Medical Records</span>
-              </Link>
+              <NavItem href="/dashboard/patient/intake" icon={<DocumentIcon />} label="Medical Intake" />
+              <NavItem href="/dashboard/patient/appointments" icon={<CalendarIcon />} label="My Appointments" />
+              <NavItem href="/dashboard/patient/records" icon={<DocumentIcon />} label="Medical Records" />
             </>
           )}
 
           {user.role === UserRole.ADMIN && (
             <>
-              <div className="pt-4">
-                <p className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Administration</p>
+              <div className="mt-6 mb-2 px-4">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Administration</p>
               </div>
-              <Link
-                href="/dashboard/admin/users"
-                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-              >
-                <UsersIcon />
-                <span className="font-medium text-sm">Users</span>
-              </Link>
-              <Link
-                href="/dashboard/admin/hospitals"
-                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-              >
-                <DocumentIcon />
-                <span className="font-medium text-sm">Hospitals</span>
-              </Link>
-              <Link
-                href="/dashboard/admin/reports"
-                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-              >
-                <DocumentIcon />
-                <span className="font-medium text-sm">Reports</span>
-              </Link>
+              <NavItem href="/dashboard/admin/users" icon={<UsersIcon />} label="Users" />
+              <NavItem href="/dashboard/admin/hospitals" icon={<DocumentIcon />} label="Hospitals" />
+              <NavItem href="/dashboard/admin/reports" icon={<DocumentIcon />} label="Reports" />
             </>
           )}
         </nav>
 
         {/* Logout Button */}
-        <div className="p-6 border-t border-gray-200">
+        <div className="p-4 border-t border-slate-100">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg transition shadow-sm"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
           >
-            <LogoutIcon />
-            Logout
+            <div className="text-slate-400 group-hover:text-red-500 transition-colors">
+              <LogoutIcon />
+            </div>
+            Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden bg-slate-50/50">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-8 py-4 shadow-sm">
-          <div className="flex justify-between items-center">
+        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-20">
+          <div className="flex justify-between items-center px-8 py-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-sm text-gray-500 mt-1">Welcome back, {user.name}</p>
+              <h1 className="text-2xl font-bold font-heading text-slate-900">Dashboard</h1>
+              <p className="text-sm text-slate-500">Welcome back, {user.name}</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">{user.role.toUpperCase()}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
+            <div className="flex items-center gap-4">
+              <div className="hidden md:block text-right">
+                <p className="text-sm font-bold text-slate-900">{new Date().toLocaleDateString('en-US', { weekday: 'long' })}</p>
+                <p className="text-xs text-slate-500 text-right">
+                  {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary-50 hover:text-primary-600 transition-colors cursor-pointer">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+              </div>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto bg-gray-50">
-          <div className="p-8 max-w-7xl mx-auto">{children}</div>
+        <main className="flex-1 overflow-auto p-6 md:p-8">
+          <div className="max-w-7xl mx-auto space-y-6 animate-fade-in-up">
+            {children}
+          </div>
         </main>
       </div>
     </div>

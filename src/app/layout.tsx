@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { Inter, Outfit } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
   title: "SwasthyaSetu - Healthcare Management System",
@@ -14,9 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-gray-900">
+      <body className={`${inter.variable} ${outfit.variable} font-sans bg-slate-50 text-slate-900 antialiased`}>
         <AuthProvider>
-          <main>{children}</main>
+          <main className="min-h-screen flex flex-col">{children}</main>
         </AuthProvider>
       </body>
     </html>
