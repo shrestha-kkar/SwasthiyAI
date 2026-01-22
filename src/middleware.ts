@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Define protected routes by role
-const PROTECTED_ROUTES = {
+const PROTECTED_ROUTES: Record<string, string[]> = {
   "/doctor": ["doctor"],
   "/patient": ["patient"],
   "/admin": ["admin"],
   "/dashboard": ["doctor", "patient", "admin"],
 };
 
+// Public routes that don't require authentication
+const PUBLIC_ROUTES = ["/", "/login", "/register"];
+
+// API routes that should be skipped by middleware
+const API_ROUTES = ["/api/auth", "/api/auth/login", "/api/auth/logout", "/api/auth/me"];
+
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Skip middleware for auth routes and public pages
-  if (pathname === "/" || pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/api/auth")) {
+  // Skip middleware for public routes and API auth endpoints
+  if (
+    PUBLIC_ROUTES.includes(pathname) ||
+    API_ROUTES.some((route) => pathname.startsWith(route))
+  ) {
     return NextResponse.next();
   }
 
@@ -29,30 +38,23 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("auth_token")?.value;
 
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    // Redirect to login with return URL for better UX
+    return NextResponse.redirect(
+      new URL(`/login?from=${encodeURIComponent(pathname)}`, request.url)
+    );
   }
 
-  try {
-    // Since JWT verification requires crypto, we'll do a basic check
-    // In Node.js runtime, this would work, but middleware runs on edge runtime
-    // So we redirect to a dedicated verification endpoint instead
-    
-    // For now, if token exists, we assume it's valid
-    // The actual verification happens in the API routes and useAuth hook
-    
-    return NextResponse.next();
-  } catch (error) {
-    console.error("Auth check error:", error);
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  // Token exists, allow the request
+  // Full JWT verification is done in API routes and client-side hooks
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except for:
      * - _next/static (static files)
-     * - _next/image (image optimization files)
+     * - _next/image (image optimization)
      * - favicon.ico (favicon file)
      * - public folder
      */

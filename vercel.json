@@ -1,0 +1,32 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "nodejs": "20.x",
+  "env": {
+    "DATABASE_URL": {
+      "description": "PostgreSQL database connection string with connection pooling. Use PgBouncer for serverless.",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT token signing. Use a strong random string in production.",
+      "required": true
+    },
+    "NODE_ENV": {
+      "value": "production",
+      "required": true
+    },
+    "NEXT_PUBLIC_API_URL": {
+      "description": "Public API base URL. Set to your Vercel deployment URL.",
+      "required": false
+    }
+  },
+  "functions": {
+    "src/app/api/**": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "regions": ["auto"]
+}

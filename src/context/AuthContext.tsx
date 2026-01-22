@@ -8,7 +8,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User | undefined>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const simpleToken = btoa(`${userData.id}:${new Date().getTime()}`);
       setToken(simpleToken);
       localStorage.setItem('auth_token', simpleToken);
+      return userData;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An error occurred during login";

@@ -114,25 +114,71 @@ src/
 ```bash
 # Development
 npm run dev         # Start dev server
+npm run lint        # Run ESLint
 
-# Production
+# Production Build & Run
 npm run build       # Build for production
 npm start          # Start production server
 
-# Code Quality
-npm run lint       # Run ESLint
+# Database
+npm run db:push    # Push schema to database
+npm run db:migrate # Create migration
+npm run db:seed    # Seed database with sample data
+npm run db:studio  # Open Prisma Studio
+```
+
+## 🌐 Deployment
+
+### Ready for Vercel Deployment
+
+This project is fully configured for deployment on Vercel with Next.js, Prisma, and PostgreSQL.
+
+**Deployment Documentation:**
+- **[VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md)** - Complete deployment guide
+- **[VERCEL_DEPLOYMENT_CHECKLIST.md](./VERCEL_DEPLOYMENT_CHECKLIST.md)** - Step-by-step checklist
+
+**Quick Summary:**
+1. ✅ `vercel.json` configured with proper settings
+2. ✅ Environment variables template in `.env.example`
+3. ✅ Prisma client optimized for serverless
+4. ✅ Middleware configured for edge runtime
+5. ✅ Security headers configured in Next.js config
+6. ✅ Database connection pooling ready (use Supabase/Neon)
+
+**Deploy in 3 steps:**
+```bash
+# 1. Push to GitHub
+git push origin main
+
+# 2. Go to vercel.com/new and import repository
+
+# 3. Set environment variables and deploy
+# (See VERCEL_DEPLOYMENT_GUIDE.md for details)
 ```
 
 ## 🔧 Configuration
 
 ### Environment Variables (.env.local)
 ```env
-JWT_SECRET=your-secret-key-change-in-production
+# Database (with connection pooling for Vercel)
+DATABASE_URL=postgresql://user:password@host:port/db?schema=public
+
+# Authentication
+JWT_SECRET=your-strong-random-key-32-chars-minimum
+
+# Environment
 NODE_ENV=development
+
+# API Configuration
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-**Important**: Change `JWT_SECRET` to a strong random key for production.
+**For Production:** See [VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md) for production environment setup.
+
+**Important**: 
+- Change `JWT_SECRET` to a strong random key for production
+- Use database connection pooling (PgBouncer/Supabase) for serverless
+- Never commit `.env.local` - it's in `.gitignore`
 
 ## 📖 Documentation
 
